@@ -36,8 +36,11 @@ Student Researchers: Ian Hawthorne and Nathan Holtrop.
 
 ## Key Dates (2026)
 Project Start: May 11
+
 Break Week: June 15–19
+
 Public Presentation: July 17
+
 Project Conclusion: July 21
 
 ## Acknowledgments
