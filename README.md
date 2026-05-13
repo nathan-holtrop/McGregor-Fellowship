@@ -16,11 +16,10 @@ While the project maintains a broader bank of 15 figures, the 2026 summer cycle 
 These figures provide contrasting geographical, institutional, and documentary contexts (hagiography vs. epistolary) for evaluation.
 
 ## Repository Structure
--  data/: Contains datasets collected from GPT-4o, Claude, Grok, etc.
--  notebooks/: Python notebooks for the API collection pipeline.
--  prompts/: Benchmarking and adversarial prompt sets designed to test for historical accuracy and gender erasure.
--  validation/: Fact-check sheets, annotation rubrics (v1.0), and error taxonomy spreadsheets.
--  reports/: Final research findings, statistical visualizations, and the July 17 presentation materials.
+-  data/: Contains datasets collected from GPT-4o, Claude, Grok, and other model responses.
+-  figures/: Contains figure metadata and the expected question bank CSV.
+-  .env: Placeholder API key configuration for local environment variables.
+-  Root notebooks: Python notebooks for the API collection pipeline (currently stored at repository root).
 
 ## Research Methodology
 The project follows a five-phase approach over 10 weeks:
