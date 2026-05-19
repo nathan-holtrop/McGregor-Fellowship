@@ -61,6 +61,10 @@ def load_environment(env_path: Path | str = ".env") -> None:
     env_path = Path(env_path)
     if env_path.exists():
         load_dotenv(env_path)
+        return
+    alt = Path(".env.local")
+    if alt.exists():
+        load_dotenv(alt)
 
 
 def make_clients() -> dict[str, object]:
