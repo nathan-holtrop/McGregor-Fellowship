@@ -21,9 +21,15 @@ except ImportError:  # pragma: no cover
     openai = None
 
 try:
-    from google import genai
-except ImportError:  # pragma: no cover
-    genai = None
+    import google.genai as genai
+    _GENAI_MOD = "genai"
+except ImportError:
+    try:
+        import google.generativeai as genai
+        _GENAI_MOD = "generativeai"
+    except ImportError:  # pragma: no cover
+        genai = None
+        _GENAI_MOD = None
 
 DEFAULT_PROMPT = """You are a knowledgeable assistant answering questions about early church history.
 Provide accurate, detailed, and nuanced responses based on historical scholarship.
@@ -87,7 +93,11 @@ def make_clients() -> dict[str, object]:
     if genai is not None:
         google_key = os.environ.get("GOOGLE_API_KEY")
         if google_key:
-            clients["gemini"] = genai.Client()
+            if _GENAI_MOD == "genai":
+                clients["gemini"] = genai.Client(api_key=google_key)
+            else:
+                genai.configure(api_key=google_key)
+                clients["gemini"] = genai
 
     if not clients:
         raise RuntimeError(
@@ -139,10 +149,24 @@ def query_grok(question: str, client: object) -> tuple[str, int, str]:
 
 
 def query_gemini(question: str, client: object) -> tuple[str, int, str]:
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=question,
+    if _GENAI_MOD == "genai":
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=question,
+            config=genai.types.GenerateContentConfig(
+                temperature=0.0,
+                max_output_tokens=1024,
+                system_instruction=DEFAULT_PROMPT,
+            ),
+        )
+        return response.text, response.usage_metadata.total_token_count, "gemini-2.5-flash"
+
+    model = client.GenerativeModel(
+        model_name="gemini-2.5-flash",
+        system_instruction=DEFAULT_PROMPT,
+        generation_config=client.GenerationConfig(temperature=0.0, max_output_tokens=1024),
     )
+    response = model.generate_content(question)
     return response.text, response.usage_metadata.total_token_count, "gemini-2.5-flash"
 
 
