@@ -11,6 +11,7 @@ const downloadPayloadBtn = document.getElementById('downloadPayloadBtn');
 const payloadOutput = document.getElementById('payloadOutput');
 const runSampleBtn = document.getElementById('runSampleBtn');
 const responseOutput = document.getElementById('responseOutput');
+const requestPreview = document.getElementById('requestPreview');
 const resultCount = document.getElementById('resultCount');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
 
@@ -36,7 +37,7 @@ const providerConfig = {
   grok: {
     name: 'Grok (xAI)',
     models: ['grok-2', 'grok-1'],
-    endpoint: 'https://api.x.ai/v1/engines',
+    endpoint: 'https://api.grok.ai/v1/engines',
     keyHint: 'GROK_API_KEY',
   },
 };
@@ -310,7 +311,9 @@ function makeAnthropicPayload(row) {
 
 function makeGeminiPayload(row) {
   return {
-    prompt: row.prompt,
+    prompt: {
+      text: row.prompt,
+    },
     temperature: 0.0,
     max_output_tokens: 512,
     candidate_count: 1,
@@ -377,7 +380,7 @@ function buildSampleRequest(row, apiKey) {
   }
 
   if (provider === 'grok') {
-    const url = `https://api.x.ai/v1/engines/${encodeURIComponent(modelSelect.value)}/completions`;
+    const url = `${providerConfig.grok.endpoint}/${encodeURIComponent(modelSelect.value)}/completions`;
     return {
       url,
       options: {
@@ -422,9 +425,25 @@ async function runSampleRequest() {
   responseOutput.textContent = 'Building sample request...';
   const sampleRequest = buildSampleRequest(sampleRow, apiKey);
   if (!sampleRequest) {
+    requestPreview.textContent = '';
     responseOutput.textContent = `Sample request is not supported for ${providerConfig[provider].name}.`;
     return;
   }
+
+  requestPreview.textContent = JSON.stringify(
+    {
+      provider: providerConfig[provider].name,
+      selectedRowCount: selectedRows.length,
+      request: {
+        description: sampleRequest.requestDescription,
+        url: sampleRequest.url,
+        headers: sampleRequest.options.headers,
+        body: sampleRequest.requestBody,
+      },
+    },
+    null,
+    2,
+  );
 
   try {
     const response = await fetch(sampleRequest.url, sampleRequest.options);
@@ -480,6 +499,7 @@ function init() {
   loadSavedApiKey();
   csvPreview.textContent = 'No CSV uploaded yet.';
   payloadOutput.textContent = 'Build payload to see preview.';
+  requestPreview.textContent = 'Request preview appears here after you run a sample request.';
   responseOutput.textContent = 'Run a sample request to see the provider response here.';
 }
 
