@@ -129,6 +129,10 @@ function normalizeHeader(header) {
   return cleaned.toLowerCase().replace(/\s+/g, '_') || 'column';
 }
 
+function getRowField(row, normalized, raw) {
+  return row[normalized] || row[raw] || '';
+}
+
 function parseCsv(text) {
   const rows = [];
   const lines = text.replace(/\r/g, '').split('\n').filter(Boolean);
@@ -183,8 +187,9 @@ function renderCsvPreview() {
     return;
   }
 
-  const previewCount = Math.min(Number(resultCount.value) || 5, csvRows.length);
-  const shownRows = csvRows.slice(0, previewCount);
+  const validRows = csvRows.filter((row) => getRowField(row, 'question', 'Question').trim() !== '');
+  const previewCount = Math.min(Number(resultCount.value) || 5, validRows.length);
+  const shownRows = validRows.slice(0, previewCount);
   const preview = [csvHeaders.join(', '), ...shownRows.map(row => csvHeaders.map(key => row[key] || '').join(', '))].join('\n');
   csvPreview.textContent = preview;
 }
@@ -194,23 +199,42 @@ function buildPrompt(questionText) {
   return template.replace(/\{\{\s*question\s*\}\}/gi, questionText);
 }
 
-function buildPayload() {
+function buildPayload(limitRows = null) {
   const provider = providerSelect.value;
   const model = modelSelect.value;
   if (!csvRows.length) {
     alert('Upload a CSV before building the payload.');
     return null;
   }
-  const questions = csvRows.map((row, index) => {
-    const questionText = row.question || row.Question || row.prompt || Object.values(row).join(' ');
+
+  const validRows = csvRows.filter((row) => {
+    const questionText = getRowField(row, 'question', 'Question').trim();
+    return questionText !== '';
+  });
+
+  const selectedRows = Number.isInteger(limitRows) || typeof limitRows === 'number'
+    ? validRows.slice(0, Math.max(0, Number(limitRows)))
+    : validRows;
+
+  const questions = selectedRows.map((row, index) => {
+    const questionText = getRowField(row, 'question', 'Question').trim();
+    const metadata = {};
+    csvHeaders.forEach((header) => {
+      if (!header) return;
+      const normalizedHeader = normalizeHeader(header);
+      const value = getRowField(row, normalizedHeader, header).trim();
+      if (value) {
+        metadata[header] = value;
+      }
+    });
     return {
       index: index + 1,
-      qnum: row.qnum || row['Q#'] || '',
+      qnum: getRowField(row, 'qnum', 'Q#'),
       question: questionText,
-      category: row.category || row.Category || '',
-      difficulty: row.difficulty || row.Difficulty || '',
+      category: getRowField(row, 'category', 'Category'),
+      difficulty: getRowField(row, 'difficulty', 'Difficulty'),
       prompt: buildPrompt(questionText),
-      metadata: row,
+      metadata,
     };
   });
 
@@ -224,7 +248,8 @@ function buildPayload() {
 }
 
 function showPayload() {
-  const payload = buildPayload();
+  const limit = Number(resultCount.value);
+  const payload = buildPayload(Number.isNaN(limit) ? null : limit);
   if (!payload) return;
   payloadOutput.textContent = JSON.stringify(payload, null, 2);
 }
