@@ -22,6 +22,22 @@ body {
   line-height: 1.7;
 }
 
+body.dark {
+  color-scheme: dark;
+  --bg: #181818;
+  --surface: #242424;
+  --surface-border: #3a3a3a;
+  --text: #ece6db;
+  --muted: #b0a99b;
+  --accent: #9ca8b9;
+  --accent-soft: #7f8b9c;
+  --input-bg: #202124;
+  --button-text: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.35);
+  background: var(--bg);
+  color: var(--text);
+}
+
 * {
   box-sizing: border-box;
 }
