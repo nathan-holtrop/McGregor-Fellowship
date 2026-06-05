@@ -31,3 +31,13 @@ To run a single provider:
 ## Notes
 - Outputs are written to `data/responses/`.
 - The pipeline supports Claude, OpenAI, Grok, and Gemini.
+
+## GitHub Pages UI
+A static frontend has been added under `docs/` for CSV upload, provider selection, and payload preview.
+
+To use it:
+1. In GitHub repository settings, enable GitHub Pages and select the `docs/` folder as the published source.
+2. Open `docs/index.html` locally or via the published site.
+3. Upload your CSV file, choose a provider and model, and save your API key locally in the browser.
+
+> Note: This site is static. API keys are stored in local browser storage only and are not sent to a server.

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>McGregor Fellowship Model Tester</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header>
+        <h1>McGregor Fellowship Question Bank Tester</h1>
+        <p>Upload a CSV question bank, pick a model, save your API key locally, and preview the request payload for evaluation.</p>
+      </header>
+
+      <section class="card">
+        <h2>1. Provider &amp; API key</h2>
+        <div class="field-row">
+          <label for="providerSelect">Provider</label>
+          <select id="providerSelect"></select>
+        </div>
+        <div class="field-row">
+          <label for="modelSelect">Model</label>
+          <select id="modelSelect"></select>
+        </div>
+        <div class="field-row">
+          <label for="apiKeyInput">API key</label>
+          <input id="apiKeyInput" type="password" placeholder="Enter your key" autocomplete="off" />
+        </div>
+        <div class="button-row">
+          <button id="saveKeyBtn" type="button">Save API key</button>
+          <button id="clearKeyBtn" type="button" class="secondary">Clear saved key</button>
+        </div>
+        <p class="note">Keys are stored locally in your browser only. This site is static and does not keep your API key on a server.</p>
+      </section>
+
+      <section class="card">
+        <h2>2. Upload your CSV question bank</h2>
+        <div class="field-row">
+          <label for="csvUpload">CSV file</label>
+          <input id="csvUpload" type="file" accept=".csv,text/csv" />
+        </div>
+        <p>Required format: first row headers like <code>question</code>, <code>answer</code>, or single-column CSV with question text.</p>
+        <div id="csvPreview" class="preview-box"></div>
+      </section>
+
+      <section class="card">
+        <h2>3. Build payload</h2>
+        <div class="field-row">
+          <label for="promptTemplate">Prompt template</label>
+          <textarea id="promptTemplate" rows="4">Use the provided question and create an answer in a concise format.</textarea>
+        </div>
+        <div class="field-row">
+          <label for="resultCount">Preview rows</label>
+          <input id="resultCount" type="number" min="1" max="20" value="5" />
+        </div>
+        <div class="button-row">
+          <button id="showPayloadBtn" type="button">Show payload preview</button>
+          <button id="downloadPayloadBtn" type="button" class="secondary">Download payload JSON</button>
+        </div>
+        <div id="payloadOutput" class="preview-box"></div>
+      </section>
+
+      <section class="card">
+        <h2>4. Run a quick sample request</h2>
+        <p>This static site can build the request payload. If your provider supports browser CORS and your API key works, you can also execute a sample request for the first question.</p>
+        <div class="button-row">
+          <button id="runSampleBtn" type="button">Run sample request</button>
+        </div>
+        <div id="responseOutput" class="preview-box"></div>
+      </section>
+
+      <footer>
+        <p>Deploy with GitHub Pages from the <code>docs/</code> folder in this repository.</p>
+      </footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
