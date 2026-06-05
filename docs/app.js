@@ -12,6 +12,7 @@ const payloadOutput = document.getElementById('payloadOutput');
 const runSampleBtn = document.getElementById('runSampleBtn');
 const responseOutput = document.getElementById('responseOutput');
 const resultCount = document.getElementById('resultCount');
+const themeToggleBtn = document.getElementById('themeToggleBtn');
 
 const providerConfig = {
   openai: {
@@ -42,6 +43,30 @@ const providerConfig = {
 
 let csvRows = [];
 let csvHeaders = [];
+
+function applyTheme(theme) {
+  const normalized = theme === 'dark' ? 'dark' : 'light';
+  document.body.classList.toggle('dark', normalized === 'dark');
+  themeToggleBtn.textContent = normalized === 'dark' ? '☀️' : '🌙';
+  themeToggleBtn.setAttribute('aria-label', normalized === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  window.localStorage.setItem('mcgregor-theme', normalized);
+}
+
+function loadTheme() {
+  const saved = window.localStorage.getItem('mcgregor-theme');
+  if (saved) {
+    applyTheme(saved);
+    return;
+  }
+
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(prefersDark ? 'dark' : 'light');
+}
+
+function toggleTheme() {
+  const current = document.body.classList.contains('dark') ? 'dark' : 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
 
 function populateProviders() {
   Object.entries(providerConfig).forEach(([key, provider]) => {
@@ -279,5 +304,6 @@ showPayloadBtn.addEventListener('click', showPayload);
 downloadPayloadBtn.addEventListener('click', downloadPayload);
 runSampleBtn.addEventListener('click', runSampleRequest);
 resultCount.addEventListener('change', renderCsvPreview);
+themeToggleBtn.addEventListener('click', toggleTheme);
 
 init();

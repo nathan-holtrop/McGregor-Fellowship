@@ -4,12 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>McGregor Fellowship Model Tester</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="page-shell">
       <header>
-        <h1>McGregor Fellowship Question Bank Tester</h1>
+        <div class="header-top">
+          <h1>McGregor Fellowship Question Bank Tester</h1>
+          <button id="themeToggleBtn" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">🌙</button>
+        </div>
         <p>Upload a CSV question bank, pick a model, save your API key locally, and preview the request payload for evaluation.</p>
       </header>
 
