@@ -87,6 +87,13 @@ function populateModels() {
     option.textContent = model;
     modelSelect.appendChild(option);
   });
+  updateModelListNote(provider);
+}
+
+function updateModelListNote(provider) {
+  const note = document.getElementById('modelListNote');
+  const models = providerConfig[provider].models;
+  note.textContent = `Supported models for ${providerConfig[provider].name}: ${models.join(', ')}.`;
 }
 
 function loadSavedApiKey() {
