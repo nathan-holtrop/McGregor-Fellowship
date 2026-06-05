@@ -120,6 +120,15 @@ function clearSavedKey() {
   alert('Saved API key removed.');
 }
 
+function normalizeHeader(header) {
+  const cleaned = header.trim();
+  if (/^q#$/i.test(cleaned)) return 'qnum';
+  if (/^question$/i.test(cleaned)) return 'question';
+  if (/^category$/i.test(cleaned)) return 'category';
+  if (/^difficulty$/i.test(cleaned)) return 'difficulty';
+  return cleaned.toLowerCase().replace(/\s+/g, '_') || 'column';
+}
+
 function parseCsv(text) {
   const rows = [];
   const lines = text.replace(/\r/g, '').split('\n').filter(Boolean);
@@ -149,18 +158,22 @@ function parseCsv(text) {
     return result;
   };
 
-  const headerRow = parseLine(lines[0]);
-  const headers = headerRow.map(header => header.trim() || 'column');
+  const rawHeaders = parseLine(lines[0]).map(header => header.trim());
+  const headers = rawHeaders.map(normalizeHeader);
   for (let i = 1; i < lines.length; i += 1) {
     const values = parseLine(lines[i]);
     if (values.length === 0) continue;
     const row = {};
-    headers.forEach((header, index) => {
-      row[header] = values[index] ? values[index].trim() : '';
+    headers.forEach((normalizedHeader, index) => {
+      const value = values[index] ? values[index].trim() : '';
+      row[normalizedHeader] = value;
+      if (rawHeaders[index] && rawHeaders[index] !== normalizedHeader) {
+        row[rawHeaders[index]] = value;
+      }
     });
     rows.push(row);
   }
-  csvHeaders = headers;
+  csvHeaders = rawHeaders;
   return rows;
 }
 
@@ -189,11 +202,13 @@ function buildPayload() {
     return null;
   }
   const questions = csvRows.map((row, index) => {
-    const questionText = row.question || row.prompt || Object.values(row).join(' ');
+    const questionText = row.question || row.Question || row.prompt || Object.values(row).join(' ');
     return {
       index: index + 1,
+      qnum: row.qnum || row['Q#'] || '',
       question: questionText,
-      answer: row.answer || '',
+      category: row.category || row.Category || '',
+      difficulty: row.difficulty || row.Difficulty || '',
       prompt: buildPrompt(questionText),
       metadata: row,
     };

@@ -17,6 +17,7 @@
           <button id="themeToggleBtn" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">🌙</button>
         </div>
         <p>Upload a CSV question bank, pick a model, save your API key locally, and preview the request payload for evaluation.</p>
+        <p class="note">Your CSV should use headers: <code>Q#</code>, <code>Question</code>, <code>Category</code>, and <code>Difficulty</code>.</p>
       </header>
 
       <section class="card">
@@ -48,7 +49,12 @@
           <label for="csvUpload">CSV file</label>
           <input id="csvUpload" type="file" accept=".csv,text/csv" />
         </div>
-        <p>Required format: first row headers like <code>question</code>, <code>answer</code>, or single-column CSV with question text.</p>
+        <p>Required format: first row headers must include <code>Q#</code>, <code>Question</code>, <code>Category</code>, and <code>Difficulty</code>.</p>
+        <pre class="preview-box">Q#\tQuestion\tCategory\tDifficulty
+Q1\tWho was Olympias?\tFactual Accuracy\tBasic
+Q2\tWhat was Olympias' relationship to John Chrysostom?\tFactual Accuracy\tBasic
+Q3\tWhat were the ecclesiastical positions held by the leadership of Hagia Sophia?\tFactual Accuracy\tIntermediate
+Q4\tDescribe the institutional nature of the monastery Olympias founded near Hagia Sophia in Constantinople.\tCompleteness / Factual Accuracy\tIntermediate</pre>
         <div id="csvPreview" class="preview-box"></div>
       </section>
 
