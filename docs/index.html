@@ -74,10 +74,11 @@ Q4\tDescribe the institutional nature of the monastery Olympias founded near Hag
 
       <section class="card">
         <h2>4. Run a quick sample request</h2>
-        <p>This builds and sends one request for the first question. If the provider supports browser-based requests and your key works, it will show the request and response here.</p>
+        <p>This builds and sends one request for the first question. If the provider supports browser-based requests and your key works, it will open the response on a second page.</p>
         <p class="note">Supported sample providers: OpenAI, Anthropic, Gemini, and Grok. Browser execution may still be blocked by provider CORS policies.</p>
+        <p class="note">After the sample request completes, the request, response, and metrics appear on a dedicated results page.</p>
         <div class="button-row">
-          <button id="runSampleBtn" type="button">Run sample request</button>
+          <button id="runSampleBtn" type="button">Run sample request and view results</button>
         </div>
         <div id="requestPreview" class="preview-box"></div>
         <div id="responseOutput" class="preview-box"></div>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>McGregor Fellowship Sample Results</title>
+    <link rel="stylesheet" href="styles.css?v=3" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header>
+        <div class="header-top">
+          <h1>AI Sample Results</h1>
+          <button id="themeToggleBtn" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">🌙</button>
+        </div>
+        <p>Review the provider request, response, and calculated metrics on this dedicated results page.</p>
+      </header>
+
+      <nav class="results-nav" aria-label="Results page navigation">
+        <a href="#summary">Summary</a>
+        <a href="#request">Request</a>
+        <a href="#metrics">Metrics</a>
+        <a href="#response">Response</a>
+      </nav>
+
+      <section id="summary" class="card">
+        <h2>Summary</h2>
+        <div id="summaryBlock" class="preview-box"></div>
+      </section>
+
+      <section id="request" class="card">
+        <h2>Request</h2>
+        <div id="requestBlock" class="preview-box"></div>
+      </section>
+
+      <section id="metrics" class="card">
+        <h2>Metrics</h2>
+        <div id="metricsBlock" class="preview-box"></div>
+      </section>
+
+      <section id="response" class="card">
+        <h2>Response</h2>
+        <div id="responseBlock" class="preview-box"></div>
+      </section>
+
+      <div class="button-row">
+        <a class="button secondary" href="index.html">Back to tester</a>
+      </div>
+
+      <footer>
+        <p>If no results appear, run the sample request again from the tester page.</p>
+      </footer>
+    </div>
+    <script src="results.js?v=1"></script>
+  </body>
+</html>

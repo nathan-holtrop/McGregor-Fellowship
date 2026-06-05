@@ -60,6 +60,28 @@ header {
   border-bottom: 1px solid var(--surface-border-soft);
 }
 
+.results-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 26px;
+  padding: 16px 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  background: var(--panel-bg);
+}
+
+.results-nav a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.results-nav a:hover,
+.results-nav a:focus {
+  text-decoration: underline;
+}
+
 .header-top {
   display: flex;
   align-items: flex-start;

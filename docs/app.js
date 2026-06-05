@@ -330,6 +330,11 @@ function makeGrokPayload(row) {
   };
 }
 
+function saveSampleResults(data) {
+  window.sessionStorage.setItem('mcgregor-sample-results', JSON.stringify(data));
+  window.location.href = 'results.html';
+}
+
 function buildSampleRequest(row, apiKey) {
   const provider = providerSelect.value;
   if (provider === 'openai') {
@@ -423,11 +428,28 @@ async function runSampleRequest() {
     prompt: buildBatchPrompt(selectedRows),
   };
 
-  responseOutput.textContent = 'Building sample request...';
   const sampleRequest = buildSampleRequest(sampleRow, apiKey);
+  const elapsedStart = performance.now();
+
   if (!sampleRequest) {
-    requestPreview.textContent = '';
-    responseOutput.textContent = `Sample request is not supported for ${providerConfig[provider].name}.`;
+    const elapsedMs = performance.now() - elapsedStart;
+    saveSampleResults({
+      providerName: providerConfig[provider].name,
+      provider,
+      model: modelSelect.value,
+      runTimestamp: new Date().toISOString(),
+      selectedQuestionCount: selectedRows.length,
+      payloadRowCount: payload.rows.length,
+      requestDescription: '',
+      requestUrl: '',
+      requestHeaders: {},
+      requestBody: null,
+      selectedQuestions: selectedRows.map((row) => ({ qnum: row.qnum || row['Q#'], question: row.question })),
+      responseBody: null,
+      status: null,
+      error: `Sample request is not supported for ${providerConfig[provider].name}.`,
+      elapsedMs,
+    });
     return;
   }
 
@@ -455,41 +477,44 @@ async function runSampleRequest() {
     } else {
       data = await response.text();
     }
+    const elapsedMs = performance.now() - elapsedStart;
 
-    responseOutput.textContent = JSON.stringify(
-      {
-        provider: providerConfig[provider].name,
-        request: {
-          description: sampleRequest.requestDescription,
-          url: sampleRequest.url,
-          headers: sampleRequest.options.headers,
-          body: sampleRequest.requestBody,
-        },
-        selectedRowCount: selectedRows.length,
-        selectedQuestions: selectedRows.map((row) => ({ qnum: row.qnum || row['Q#'], question: row.question })),
-        response: data,
-        status: response.status,
-      },
-      null,
-      2,
-    );
+    saveSampleResults({
+      providerName: providerConfig[provider].name,
+      provider,
+      model: modelSelect.value,
+      runTimestamp: new Date().toISOString(),
+      selectedQuestionCount: selectedRows.length,
+      payloadRowCount: payload.rows.length,
+      requestDescription: sampleRequest.requestDescription,
+      requestUrl: sampleRequest.url,
+      requestHeaders: sampleRequest.options.headers,
+      requestBody: sampleRequest.requestBody,
+      selectedQuestions: selectedRows.map((row) => ({ qnum: row.qnum || row['Q#'], question: row.question })),
+      responseBody: data,
+      status: response.status,
+      error: null,
+      elapsedMs,
+    });
   } catch (error) {
-    responseOutput.textContent = JSON.stringify(
-      {
-        provider: providerConfig[provider].name,
-        request: {
-          description: sampleRequest.requestDescription,
-          url: sampleRequest.url,
-          headers: sampleRequest.options.headers,
-          body: sampleRequest.requestBody,
-        },
-        selectedRowCount: selectedRows.length,
-        selectedQuestions: selectedRows.map((row) => ({ qnum: row.qnum || row['Q#'], question: row.question })),
-        error: error.message,
-      },
-      null,
-      2,
-    );
+    const elapsedMs = performance.now() - elapsedStart;
+    saveSampleResults({
+      providerName: providerConfig[provider].name,
+      provider,
+      model: modelSelect.value,
+      runTimestamp: new Date().toISOString(),
+      selectedQuestionCount: selectedRows.length,
+      payloadRowCount: payload.rows.length,
+      requestDescription: sampleRequest.requestDescription,
+      requestUrl: sampleRequest.url,
+      requestHeaders: sampleRequest.options.headers,
+      requestBody: sampleRequest.requestBody,
+      selectedQuestions: selectedRows.map((row) => ({ qnum: row.qnum || row['Q#'], question: row.question })),
+      responseBody: null,
+      status: null,
+      error: error.message,
+      elapsedMs,
+    });
   }
 }
 
