@@ -199,6 +199,24 @@ function buildPrompt(questionText) {
   return template.replace(/\{\{\s*question\s*\}\}/gi, questionText);
 }
 
+function buildBatchPrompt(rows) {
+  if (!rows || !rows.length) return '';
+  if (rows.length === 1) return rows[0].prompt;
+
+  const questionBlocks = rows.map((row, index) => {
+    const qnum = row.qnum || row['Q#'] || `Q${index + 1}`;
+    const questionText = row.question || '';
+    const category = row.category || row.Category || '';
+    const difficulty = row.difficulty || row.Difficulty || '';
+    const lines = [`${qnum}: ${questionText}`];
+    if (category) lines.push(`Category: ${category}`);
+    if (difficulty) lines.push(`Difficulty: ${difficulty}`);
+    return lines.join('\n');
+  });
+
+  return `${promptTemplate.value.trim() || 'Use the provided questions and create answers in a concise format.'}\n\n${questionBlocks.join('\n\n')}`;
+}
+
 function buildPayload(limitRows = null) {
   const provider = providerSelect.value;
   const model = modelSelect.value;
@@ -212,9 +230,9 @@ function buildPayload(limitRows = null) {
     return questionText !== '';
   });
 
-  const selectedRows = Number.isInteger(limitRows) || typeof limitRows === 'number'
-    ? validRows.slice(0, Math.max(0, Number(limitRows)))
-    : validRows;
+  const selectedRows = Number.isNaN(limitRows)
+    ? validRows
+    : validRows.slice(0, Math.max(0, Number(limitRows)));
 
   const questions = selectedRows.map((row, index) => {
     const questionText = getRowField(row, 'question', 'Question').trim();
@@ -280,9 +298,109 @@ function makeOpenAIPayload(row) {
   };
 }
 
+function makeAnthropicPayload(row) {
+  return {
+    model: modelSelect.value,
+    prompt: `\n\nHuman: ${row.prompt}\n\nAssistant:`,
+    max_tokens_to_sample: 512,
+    temperature: 0.0,
+    stop_sequences: ['\n\nHuman:'],
+  };
+}
+
+function makeGeminiPayload(row) {
+  return {
+    prompt: row.prompt,
+    temperature: 0.0,
+    max_output_tokens: 512,
+    candidate_count: 1,
+  };
+}
+
+function makeGrokPayload(row) {
+  return {
+    model: modelSelect.value,
+    prompt: row.prompt,
+    max_tokens: 512,
+    temperature: 0.0,
+  };
+}
+
+function buildSampleRequest(row, apiKey) {
+  const provider = providerSelect.value;
+  if (provider === 'openai') {
+    return {
+      url: providerConfig.openai.endpoint,
+      options: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(makeOpenAIPayload(row)),
+      },
+      requestBody: makeOpenAIPayload(row),
+      requestDescription: 'OpenAI Chat Completions request',
+    };
+  }
+
+  if (provider === 'claude') {
+    return {
+      url: providerConfig.claude.endpoint,
+      options: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(makeAnthropicPayload(row)),
+      },
+      requestBody: makeAnthropicPayload(row),
+      requestDescription: 'Anthropic completion request',
+    };
+  }
+
+  if (provider === 'gemini') {
+    const url = `https://generativeai.googleapis.com/v1beta2/models/${encodeURIComponent(modelSelect.value)}:generateText?key=${encodeURIComponent(apiKey)}`;
+    return {
+      url,
+      options: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(makeGeminiPayload(row)),
+      },
+      requestBody: makeGeminiPayload(row),
+      requestDescription: 'Google Gemini generateText request',
+    };
+  }
+
+  if (provider === 'grok') {
+    const url = `https://api.x.ai/v1/engines/${encodeURIComponent(modelSelect.value)}/completions`;
+    return {
+      url,
+      options: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(makeGrokPayload(row)),
+      },
+      requestBody: makeGrokPayload(row),
+      requestDescription: 'Grok completion request',
+    };
+  }
+
+  return null;
+}
+
 async function runSampleRequest() {
-  const payload = buildPayload();
+  const limit = Number(resultCount.value);
+  const payload = buildPayload(Number.isNaN(limit) ? null : limit);
   if (!payload) return;
+
   const provider = providerSelect.value;
   const apiKey = apiKeyInput.value.trim() || window.localStorage.getItem(`ai-tester-key-${provider}`);
   if (!apiKey) {
@@ -290,28 +408,68 @@ async function runSampleRequest() {
     return;
   }
 
-  const sampleRow = payload.rows[0];
-  const samplePrompt = sampleRow.prompt;
-  responseOutput.textContent = 'Sending sample request...';
+  const selectedRows = payload.rows;
+  if (!selectedRows.length) {
+    alert('No valid rows available for a sample request.');
+    return;
+  }
+
+  const sampleRow = {
+    ...selectedRows[0],
+    prompt: buildBatchPrompt(selectedRows),
+  };
+
+  responseOutput.textContent = 'Building sample request...';
+  const sampleRequest = buildSampleRequest(sampleRow, apiKey);
+  if (!sampleRequest) {
+    responseOutput.textContent = `Sample request is not supported for ${providerConfig[provider].name}.`;
+    return;
+  }
 
   try {
-    if (provider === 'openai') {
-      const response = await fetch(providerConfig.openai.endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(makeOpenAIPayload(sampleRow)),
-      });
-      const data = await response.json();
-      responseOutput.textContent = JSON.stringify({ request: makeOpenAIPayload(sampleRow), response: data }, null, 2);
-      return;
+    const response = await fetch(sampleRequest.url, sampleRequest.options);
+    let data;
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = await response.text();
     }
 
-    responseOutput.textContent = `Sample request is not implemented for ${providerConfig[provider].name} in this static demo. Use the payload preview or add your own request logic.`;
+    responseOutput.textContent = JSON.stringify(
+      {
+        provider: providerConfig[provider].name,
+        request: {
+          description: sampleRequest.requestDescription,
+          url: sampleRequest.url,
+          headers: sampleRequest.options.headers,
+          body: sampleRequest.requestBody,
+        },
+        selectedRowCount: selectedRows.length,
+        selectedQuestions: selectedRows.map((row) => ({ qnum: row.qnum || row['Q#'], question: row.question })),
+        response: data,
+        status: response.status,
+      },
+      null,
+      2,
+    );
   } catch (error) {
-    responseOutput.textContent = `Request failed: ${error.message}`;
+    responseOutput.textContent = JSON.stringify(
+      {
+        provider: providerConfig[provider].name,
+        request: {
+          description: sampleRequest.requestDescription,
+          url: sampleRequest.url,
+          headers: sampleRequest.options.headers,
+          body: sampleRequest.requestBody,
+        },
+        selectedRowCount: selectedRows.length,
+        selectedQuestions: selectedRows.map((row) => ({ qnum: row.qnum || row['Q#'], question: row.question })),
+        error: error.message,
+      },
+      null,
+      2,
+    );
   }
 }
 
