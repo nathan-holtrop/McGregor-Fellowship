@@ -48,7 +48,8 @@ let csvHeaders = [];
 function applyTheme(theme) {
   const normalized = theme === 'dark' ? 'dark' : 'light';
   document.body.classList.toggle('dark', normalized === 'dark');
-  themeToggleBtn.textContent = normalized === 'dark' ? '☀️' : '🌙';
+  // Show the current theme as a short label for clarity, keep aria-label describing the action
+  themeToggleBtn.textContent = normalized === 'dark' ? 'Dark' : 'Light';
   themeToggleBtn.setAttribute('aria-label', normalized === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
   window.localStorage.setItem('mcgregor-theme', normalized);
 }
