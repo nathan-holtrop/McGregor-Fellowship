@@ -269,6 +269,7 @@ async function runSampleRequest() {
 }
 
 function init() {
+  loadTheme();
   populateProviders();
   populateModels();
   loadSavedApiKey();
