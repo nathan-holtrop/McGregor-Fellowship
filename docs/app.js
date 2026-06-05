@@ -17,25 +17,25 @@ const themeToggleBtn = document.getElementById('themeToggleBtn');
 const providerConfig = {
   openai: {
     name: 'OpenAI',
-    models: ['gpt-4o-mini', 'gpt-4.1', 'gpt-3.5-turbo', 'gpt-4'],
+    models: ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo'],
     endpoint: 'https://api.openai.com/v1/chat/completions',
     keyHint: 'OPENAI_API_KEY',
   },
   claude: {
     name: 'Anthropic Claude',
-    models: ['claude-3.5', 'claude-3', 'claude-2.1'],
+    models: ['claude-4o', 'claude-4.1', 'claude-3.5', 'claude-instant'],
     endpoint: 'https://api.anthropic.com/v1/complete',
     keyHint: 'ANTHROPIC_API_KEY',
   },
   gemini: {
     name: 'Google Gemini',
-    models: ['gemini-1.5', 'gemini-1.5-pro', 'gemini-1.5-mini'],
+    models: ['gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-1.5', 'gemini-1.5-mini'],
     endpoint: 'https://generativeai.googleapis.com/v1beta2/models',
     keyHint: 'GOOGLE_API_KEY',
   },
   grok: {
-    name: 'Grok',
-    models: ['grok-1', 'grok-2'],
+    name: 'Grok (xAI)',
+    models: ['grok-2', 'grok-1'],
     endpoint: 'https://api.x.ai/v1/engines',
     keyHint: 'GROK_API_KEY',
   },
