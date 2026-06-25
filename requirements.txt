@@ -1,6 +1,4 @@
 openai
-anthropic
-google-genai
 python-dotenv
 pandas
 scikit-learn

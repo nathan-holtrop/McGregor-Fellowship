@@ -11,7 +11,7 @@ This repository contains the simplified collection pipeline for the McGregor Fel
 - `.env.example`: example environment file for API keys.
 
 ## Usage
-1. Copy `.env.example` to `.env.local` and fill in your API credentials.
+1. Copy `.env.example` to `.env.local` and fill in your OpenRouter credentials.
 2. Install dependencies:
 
     python -m pip install -r requirements.txt
@@ -23,6 +23,8 @@ This repository contains the simplified collection pipeline for the McGregor Fel
 To run a single provider:
 
     python collect_pipeline.py --models openai
+
+The collection script now uses a single OpenRouter API key for Claude, OpenAI, Grok, and Gemini. You can optionally override the exact OpenRouter model IDs with `OPENROUTER_MODEL_CLAUDE`, `OPENROUTER_MODEL_OPENAI`, `OPENROUTER_MODEL_GROK`, and `OPENROUTER_MODEL_GEMINI`.
 
 ## Sandbox testing
 - Use `sandbox/test_pipeline.ipynb` for manual API/test checks.

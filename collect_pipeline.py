@@ -11,14 +11,14 @@ import pandas as pd
 from dotenv import load_dotenv
 
 try:
-    import anthropic
-except ImportError:  # pragma: no cover
-    anthropic = None
-
-try:
     import openai
 except ImportError:  # pragma: no cover
     openai = None
+
+try:
+    import anthropic
+except ImportError:  # pragma: no cover
+    anthropic = None
 
 try:
     import google.genai as genai
@@ -39,10 +39,26 @@ DEFAULT_QUESTION_CSV = Path("figures/question_bank.csv")
 DEFAULT_OUTPUT_DIR = Path("data/responses")
 
 MODEL_CONFIGS = {
-    "claude": {"filename": "claude.jsonl", "sleep": 0.5},
-    "openai": {"filename": "openai.jsonl", "sleep": 0.5},
-    "grok": {"filename": "grok.jsonl", "sleep": 0.5},
-    "gemini": {"filename": "gemini.jsonl", "sleep": 1.0},
+    "claude": {
+        "filename": "claude.jsonl",
+        "sleep": 0.5,
+        "openrouter_model": "anthropic/claude-opus-4.1",
+    },
+    "openai": {
+        "filename": "openai.jsonl",
+        "sleep": 0.5,
+        "openrouter_model": "openai/gpt-4o",
+    },
+    "grok": {
+        "filename": "grok.jsonl",
+        "sleep": 0.5,
+        "openrouter_model": "x-ai/grok-2",
+    },
+    "gemini": {
+        "filename": "gemini.jsonl",
+        "sleep": 1.0,
+        "openrouter_model": "google/gemini-2.5-flash",
+    },
 }
 
 
@@ -73,9 +89,33 @@ def load_environment(env_path: Path | str = ".env") -> None:
         load_dotenv(alt)
 
 
+def get_openrouter_model_name(model_name: str) -> str:
+    env_name = f"OPENROUTER_MODEL_{model_name.upper()}"
+    if env_name in os.environ and os.environ[env_name]:
+        return os.environ[env_name]
+    return MODEL_CONFIGS[model_name]["openrouter_model"]
+
+
 def make_clients() -> dict[str, object]:
     load_environment()
     clients: dict[str, object] = {}
+
+    if openai is not None:
+        openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+        if openrouter_key:
+            headers = {}
+            if os.environ.get("OPENROUTER_HTTP_REFERER"):
+                headers["HTTP-Referer"] = os.environ["OPENROUTER_HTTP_REFERER"]
+            if os.environ.get("OPENROUTER_APP_NAME"):
+                headers["X-Title"] = os.environ["OPENROUTER_APP_NAME"]
+            openrouter_client = openai.OpenAI(
+                api_key=openrouter_key,
+                base_url="https://openrouter.ai/api/v1",
+                default_headers=headers or None,
+            )
+            for model_name in MODEL_CONFIGS:
+                clients[model_name] = openrouter_client
+            return clients
 
     if anthropic is not None:
         anth_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -107,24 +147,9 @@ def make_clients() -> dict[str, object]:
     return clients
 
 
-def query_claude(question: str, client: object) -> tuple[str, int, str]:
-    msg = client.messages.create(
-        model="claude-opus-4-6",
-        max_tokens=1024,
-        temperature=0.0,
-        system=DEFAULT_PROMPT,
-        messages=[{"role": "user", "content": question}],
-    )
-    return (
-        msg.content[0].text,
-        msg.usage.input_tokens + msg.usage.output_tokens,
-        msg.model,
-    )
-
-
-def query_openai(question: str, client: object) -> tuple[str, int, str]:
+def query_openrouter(question: str, client: object, model_name: str) -> tuple[str, int, str]:
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model=get_openrouter_model_name(model_name),
         temperature=0.0,
         max_tokens=1024,
         messages=[
@@ -132,49 +157,19 @@ def query_openai(question: str, client: object) -> tuple[str, int, str]:
             {"role": "user", "content": question},
         ],
     )
-    return response.choices[0].message.content, response.usage.total_tokens, response.model
-
-
-def query_grok(question: str, client: object) -> tuple[str, int, str]:
-    response = client.chat.completions.create(
-        model="grok-2",
-        temperature=0.0,
-        max_tokens=1024,
-        messages=[
-            {"role": "system", "content": DEFAULT_PROMPT},
-            {"role": "user", "content": question},
-        ],
-    )
-    return response.choices[0].message.content, response.usage.total_tokens, response.model
-
-
-def query_gemini(question: str, client: object) -> tuple[str, int, str]:
-    if _GENAI_MOD == "genai":
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=question,
-            config=genai.types.GenerateContentConfig(
-                temperature=0.0,
-                max_output_tokens=1024,
-                system_instruction=DEFAULT_PROMPT,
-            ),
-        )
-        return response.text, response.usage_metadata.total_token_count, "gemini-2.5-flash"
-
-    model = client.GenerativeModel(
-        model_name="gemini-2.5-flash",
-        system_instruction=DEFAULT_PROMPT,
-        generation_config=client.GenerationConfig(temperature=0.0, max_output_tokens=1024),
-    )
-    response = model.generate_content(question)
-    return response.text, response.usage_metadata.total_token_count, "gemini-2.5-flash"
+    content = response.choices[0].message.content
+    if isinstance(content, list):
+        content = "".join(part.text or "" for part in content if getattr(part, "type", "") == "text")
+    tokens = getattr(response.usage, "total_tokens", None)
+    version = getattr(response, "model", None) or get_openrouter_model_name(model_name)
+    return content, tokens or 0, version
 
 
 QUERY_FUNCTIONS = {
-    "claude": query_claude,
-    "openai": query_openai,
-    "grok": query_grok,
-    "gemini": query_gemini,
+    "claude": lambda question, client: query_openrouter(question, client, "claude"),
+    "openai": lambda question, client: query_openrouter(question, client, "openai"),
+    "grok": lambda question, client: query_openrouter(question, client, "grok"),
+    "gemini": lambda question, client: query_openrouter(question, client, "gemini"),
 }
 
 
