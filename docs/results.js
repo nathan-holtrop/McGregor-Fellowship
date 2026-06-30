@@ -46,7 +46,7 @@ function renderJson(value) {
 
 function renderResults(data) {
   const summaryLines = [
-    `Provider: ${data.providerName}`,
+    `Service: ${data.providerName}`,
     `Model: ${data.model}`,
     `Run timestamp: ${data.runTimestamp}`,
     `Selected questions: ${data.selectedQuestionCount}`,

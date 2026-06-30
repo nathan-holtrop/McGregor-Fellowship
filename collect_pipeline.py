@@ -15,22 +15,6 @@ try:
 except ImportError:  # pragma: no cover
     openai = None
 
-try:
-    import anthropic
-except ImportError:  # pragma: no cover
-    anthropic = None
-
-try:
-    import google.genai as genai
-    _GENAI_MOD = "genai"
-except ImportError:
-    try:
-        import google.generativeai as genai
-        _GENAI_MOD = "generativeai"
-    except ImportError:  # pragma: no cover
-        genai = None
-        _GENAI_MOD = None
-
 DEFAULT_PROMPT = """You are a knowledgeable assistant answering questions about early church history.
 Provide accurate, detailed, and nuanced responses based on historical scholarship.
 Acknowledge uncertainty or scholarly debate where it exists.
@@ -100,49 +84,31 @@ def make_clients() -> dict[str, object]:
     load_environment()
     clients: dict[str, object] = {}
 
-    if openai is not None:
-        openrouter_key = os.environ.get("OPENROUTER_API_KEY")
-        if openrouter_key:
-            headers = {}
-            if os.environ.get("OPENROUTER_HTTP_REFERER"):
-                headers["HTTP-Referer"] = os.environ["OPENROUTER_HTTP_REFERER"]
-            if os.environ.get("OPENROUTER_APP_NAME"):
-                headers["X-Title"] = os.environ["OPENROUTER_APP_NAME"]
-            openrouter_client = openai.OpenAI(
-                api_key=openrouter_key,
-                base_url="https://openrouter.ai/api/v1",
-                default_headers=headers or None,
-            )
-            for model_name in MODEL_CONFIGS:
-                clients[model_name] = openrouter_client
-            return clients
-
-    if anthropic is not None:
-        anth_key = os.environ.get("ANTHROPIC_API_KEY")
-        if anth_key:
-            clients["claude"] = anthropic.Anthropic(api_key=anth_key)
-
-    if openai is not None:
-        openai_key = os.environ.get("OPENAI_API_KEY")
-        if openai_key:
-            clients["openai"] = openai.OpenAI(api_key=openai_key)
-        xai_key = os.environ.get("XAI_API_KEY")
-        if xai_key:
-            clients["grok"] = openai.OpenAI(api_key=xai_key, base_url="https://api.x.ai/v1")
-
-    if genai is not None:
-        google_key = os.environ.get("GOOGLE_API_KEY")
-        if google_key:
-            if _GENAI_MOD == "genai":
-                clients["gemini"] = genai.Client(api_key=google_key)
-            else:
-                genai.configure(api_key=google_key)
-                clients["gemini"] = genai
-
-    if not clients:
+    if openai is None:
         raise RuntimeError(
-            "No model clients were initialized. Check that the required API keys are set in .env or the environment."
+            "The OpenAI package is required for OpenRouter access. Install it with `pip install openai`."
         )
+
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+    if not openrouter_key:
+        raise RuntimeError(
+            "OPENROUTER_API_KEY is not set. Copy `.env.example` to `.env.local` and add your OpenRouter API key, or set the environment variable directly."
+        )
+
+    headers = {}
+    if os.environ.get("OPENROUTER_HTTP_REFERER"):
+        headers["HTTP-Referer"] = os.environ["OPENROUTER_HTTP_REFERER"]
+    if os.environ.get("OPENROUTER_APP_NAME"):
+        headers["X-Title"] = os.environ["OPENROUTER_APP_NAME"]
+
+    openrouter_client = openai.OpenAI(
+        api_key=openrouter_key,
+        base_url="https://openrouter.ai/api/v1",
+        default_headers=headers or None,
+    )
+
+    for model_name in MODEL_CONFIGS:
+        clients[model_name] = openrouter_client
 
     return clients
 

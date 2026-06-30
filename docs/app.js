@@ -16,29 +16,16 @@ const resultCount = document.getElementById('resultCount');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
 
 const providerConfig = {
-  openai: {
-    name: 'OpenAI',
-    models: ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo'],
-    endpoint: 'https://api.openai.com/v1/chat/completions',
-    keyHint: 'OPENAI_API_KEY',
-  },
-  claude: {
-    name: 'Anthropic Claude',
-    models: ['claude-4o', 'claude-4.1', 'claude-3.5', 'claude-instant'],
-    endpoint: 'https://api.anthropic.com/v1/complete',
-    keyHint: 'ANTHROPIC_API_KEY',
-  },
-  gemini: {
-    name: 'Google Gemini',
-    models: ['gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-1.5', 'gemini-1.5-mini'],
-    endpoint: 'https://generativeai.googleapis.com/v1beta2/models',
-    keyHint: 'GOOGLE_API_KEY',
-  },
-  grok: {
-    name: 'Grok (xAI)',
-    models: ['grok-2', 'grok-1'],
-    endpoint: 'https://api.grok.ai/v1/engines',
-    keyHint: 'GROK_API_KEY',
+  openrouter: {
+    name: 'OpenRouter',
+    models: [
+      'anthropic/claude-opus-4.1',
+      'openai/gpt-4o',
+      'x-ai/grok-2',
+      'google/gemini-2.5-flash',
+    ],
+    endpoint: 'https://openrouter.ai/api/v1/chat/completions',
+    keyHint: 'OPENROUTER_API_KEY',
   },
 };
 
@@ -112,14 +99,14 @@ function saveApiKey() {
     return;
   }
   window.localStorage.setItem(`ai-tester-key-${provider}`, key);
-  alert('API key saved locally for this provider.');
+  alert('OpenRouter API key saved locally.');
 }
 
 function clearSavedKey() {
   const provider = providerSelect.value;
   window.localStorage.removeItem(`ai-tester-key-${provider}`);
   apiKeyInput.value = '';
-  alert('Saved API key removed.');
+  alert('Saved OpenRouter API key removed.');
 }
 
 function normalizeHeader(header) {
@@ -288,45 +275,15 @@ function downloadPayload() {
   URL.revokeObjectURL(url);
 }
 
-function makeOpenAIPayload(row) {
+function makeOpenRouterPayload(row) {
   return {
     model: modelSelect.value,
+    temperature: 0.0,
+    max_tokens: 1024,
     messages: [
       { role: 'system', content: 'You are a helpful model providing answers to evaluation questions.' },
       { role: 'user', content: row.prompt },
     ],
-    temperature: 0.0,
-    max_tokens: 512,
-  };
-}
-
-function makeAnthropicPayload(row) {
-  return {
-    model: modelSelect.value,
-    prompt: `\n\nHuman: ${row.prompt}\n\nAssistant:`,
-    max_tokens_to_sample: 512,
-    temperature: 0.0,
-    stop_sequences: ['\n\nHuman:'],
-  };
-}
-
-function makeGeminiPayload(row) {
-  return {
-    prompt: {
-      text: row.prompt,
-    },
-    temperature: 0.0,
-    max_output_tokens: 512,
-    candidate_count: 1,
-  };
-}
-
-function makeGrokPayload(row) {
-  return {
-    model: modelSelect.value,
-    prompt: row.prompt,
-    max_tokens: 512,
-    temperature: 0.0,
   };
 }
 
@@ -336,73 +293,19 @@ function saveSampleResults(data) {
 }
 
 function buildSampleRequest(row, apiKey) {
-  const provider = providerSelect.value;
-  if (provider === 'openai') {
-    return {
-      url: providerConfig.openai.endpoint,
-      options: {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(makeOpenAIPayload(row)),
+  return {
+    url: providerConfig.openrouter.endpoint,
+    options: {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
       },
-      requestBody: makeOpenAIPayload(row),
-      requestDescription: 'OpenAI Chat Completions request',
-    };
-  }
-
-  if (provider === 'claude') {
-    return {
-      url: providerConfig.claude.endpoint,
-      options: {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
-        },
-        body: JSON.stringify(makeAnthropicPayload(row)),
-      },
-      requestBody: makeAnthropicPayload(row),
-      requestDescription: 'Anthropic completion request',
-    };
-  }
-
-  if (provider === 'gemini') {
-    const url = `https://generativeai.googleapis.com/v1beta2/models/${encodeURIComponent(modelSelect.value)}:generateText?key=${encodeURIComponent(apiKey)}`;
-    return {
-      url,
-      options: {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(makeGeminiPayload(row)),
-      },
-      requestBody: makeGeminiPayload(row),
-      requestDescription: 'Google Gemini generateText request',
-    };
-  }
-
-  if (provider === 'grok') {
-    const url = `${providerConfig.grok.endpoint}/${encodeURIComponent(modelSelect.value)}/completions`;
-    return {
-      url,
-      options: {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(makeGrokPayload(row)),
-      },
-      requestBody: makeGrokPayload(row),
-      requestDescription: 'Grok completion request',
-    };
-  }
-
-  return null;
+      body: JSON.stringify(makeOpenRouterPayload(row)),
+    },
+    requestBody: makeOpenRouterPayload(row),
+    requestDescription: 'OpenRouter Chat Completions request',
+  };
 }
 
 async function runSampleRequest() {
@@ -526,7 +429,7 @@ function init() {
   csvPreview.textContent = 'No CSV uploaded yet.';
   payloadOutput.textContent = 'Build payload to see preview.';
   requestPreview.textContent = 'Request preview appears here after you run a sample request.';
-  responseOutput.textContent = 'Run a sample request to see the provider response here.';
+  responseOutput.textContent = 'Run a sample request to see the OpenRouter response here.';
 }
 
 providerSelect.addEventListener('change', () => {

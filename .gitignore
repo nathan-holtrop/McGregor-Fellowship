@@ -1,4 +1,6 @@
 .env
+.env.local
 __pycache__/
 *.pyc
-.env.local
+venv/
+data/responses/

@@ -3,6 +3,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import collect_pipeline
@@ -31,3 +33,13 @@ def test_make_clients_uses_openrouter_single_client(monkeypatch):
     assert clients["openai"] is fake_client
     assert clients["grok"] is fake_client
     assert clients["gemini"] is fake_client
+
+
+def test_make_clients_requires_openrouter_api_key(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setattr(collect_pipeline, "load_environment", lambda *args, **kwargs: None)
+    fake_openai_module = SimpleNamespace(OpenAI=lambda **kwargs: object())
+
+    with patch.object(collect_pipeline, "openai", fake_openai_module):
+        with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY"):
+            collect_pipeline.make_clients()

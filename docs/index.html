@@ -21,16 +21,16 @@
       </div>
 
       <section class="card">
-        <h2>1. Provider &amp; API key</h2>
+        <h2>1. OpenRouter model &amp; API key</h2>
         <div class="field-row">
-          <label for="providerSelect">Provider</label>
+          <label for="providerSelect">OpenRouter</label>
           <select id="providerSelect"></select>
         </div>
         <div class="field-row">
           <label for="modelSelect">Model</label>
           <select id="modelSelect"></select>
         </div>
-        <p id="modelListNote" class="note">Select a provider to see supported model names.</p>
+        <p id="modelListNote" class="note">Select OpenRouter and choose a model ID to use for the request.</p>
         <div class="field-row">
           <label for="apiKeyInput">API key</label>
           <input id="apiKeyInput" type="password" placeholder="Enter your key" autocomplete="off" />
@@ -40,7 +40,7 @@
           <button id="clearKeyBtn" type="button" class="secondary">Clear saved key</button>
         </div>
         <p class="note">Keys are stored locally in your browser only. This site is static and does not keep your API key on a server.</p>
-        <p class="note">Model lists are illustrative and may change. Always verify current model names with your provider before sending requests.</p>
+        <p class="note">Model lists are illustrative and may change. Always verify current model names with OpenRouter before sending requests.</p>
       </section>
 
       <section class="card">
@@ -77,9 +77,9 @@ Q4\tDescribe the institutional nature of the monastery Olympias founded near Hag
 
       <section class="card">
         <h2>4. Run a quick sample request</h2>
-        <p>This builds and sends one request for the first question. If the provider supports browser-based requests and your key works, it will open the response on a second page.</p>
-        <p class="note">Supported sample providers: OpenAI, Anthropic, Gemini, and Grok. Browser execution may still be blocked by provider CORS policies.</p>
-        <p class="note">After the sample request completes, the request, response, and metrics appear on a dedicated results page.</p>
+        <p>This builds and sends one request for the first question through OpenRouter using the selected OpenRouter model ID. If your OpenRouter key works and your browser allows the request, it will open the response on a second page.</p>
+        <p class="note">Supported sample models include OpenRouter model IDs such as `anthropic/claude-opus-4.1`, `openai/gpt-4o`, `x-ai/grok-2`, and `google/gemini-2.5-flash`.</p>
+        <p class="note">Browser execution may still be blocked by CORS policies.</p>
         <div class="button-row">
           <button id="runSampleBtn" type="button">Run sample request and view results</button>
         </div>
