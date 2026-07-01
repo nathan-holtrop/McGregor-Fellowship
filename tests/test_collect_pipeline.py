@@ -11,9 +11,13 @@ import collect_pipeline
 
 
 def test_get_openrouter_model_name_uses_config_override(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_MODEL_CLAUDE", "anthropic/claude-opus-4-1")
+    monkeypatch.setenv("OPENROUTER_MODEL_CLAUDE", "claude-opus-4-8")
 
-    assert collect_pipeline.get_openrouter_model_name("claude") == "anthropic/claude-opus-4-1"
+    assert collect_pipeline.get_openrouter_model_name("claude") == "claude-opus-4-8"
+
+
+def test_get_openrouter_model_name_uses_default_llama_identifier():
+    assert collect_pipeline.get_openrouter_model_name("llama") == "llama-4"
 
 
 def test_make_clients_uses_openrouter_single_client(monkeypatch):
@@ -33,6 +37,7 @@ def test_make_clients_uses_openrouter_single_client(monkeypatch):
     assert clients["openai"] is fake_client
     assert clients["grok"] is fake_client
     assert clients["gemini"] is fake_client
+    assert clients["llama"] is fake_client
 
 
 def test_make_clients_requires_openrouter_api_key(monkeypatch):

@@ -26,22 +26,27 @@ MODEL_CONFIGS = {
     "claude": {
         "filename": "claude.jsonl",
         "sleep": 0.5,
-        "openrouter_model": "anthropic/claude-opus-4.1",
+        "openrouter_model": "claude-opus-4-8",
     },
     "openai": {
         "filename": "openai.jsonl",
         "sleep": 0.5,
-        "openrouter_model": "openai/gpt-4o",
+        "openrouter_model": "gpt-5-5",
     },
     "grok": {
         "filename": "grok.jsonl",
         "sleep": 0.5,
-        "openrouter_model": "x-ai/grok-2",
+        "openrouter_model": "grok-4-3",
     },
     "gemini": {
         "filename": "gemini.jsonl",
         "sleep": 1.0,
-        "openrouter_model": "google/gemini-2.5-flash",
+        "openrouter_model": "gemini-3-1-pro",
+    },
+    "llama": {
+        "filename": "llama.jsonl",
+        "sleep": 1.0,
+        "openrouter_model": "llama-4",
     },
 }
 
@@ -136,6 +141,7 @@ QUERY_FUNCTIONS = {
     "openai": lambda question, client: query_openrouter(question, client, "openai"),
     "grok": lambda question, client: query_openrouter(question, client, "grok"),
     "gemini": lambda question, client: query_openrouter(question, client, "gemini"),
+    "llama": lambda question, client: query_openrouter(question, client, "llama"),
 }
 
 
