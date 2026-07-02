@@ -19,10 +19,12 @@ const providerConfig = {
   openrouter: {
     name: 'OpenRouter',
     models: [
-      'anthropic/claude-opus-4.1',
-      'openai/gpt-4o',
-      'x-ai/grok-2',
-      'google/gemini-2.5-flash',
+      'claude-opus-4-8',
+      'gpt-5-5',
+      'grok-4-3',
+      'gemini-3-1-pro',
+      'llama-4',
+      'z-ai/glm-5.2',
     ],
     endpoint: 'https://openrouter.ai/api/v1/chat/completions',
     keyHint: 'OPENROUTER_API_KEY',

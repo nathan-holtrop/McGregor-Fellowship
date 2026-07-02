@@ -48,6 +48,12 @@ MODEL_CONFIGS = {
         "sleep": 1.0,
         "openrouter_model": "llama-4",
     },
+    "glm": {
+        "filename": "glm.jsonl",
+        "sleep": 1.0,
+        "openrouter_model": "z-ai/glm-5.2",
+        "request_args": {"reasoning": {"enabled": True}},
+    },
 }
 
 
@@ -119,15 +125,17 @@ def make_clients() -> dict[str, object]:
 
 
 def query_openrouter(question: str, client: object, model_name: str) -> tuple[str, int, str]:
-    response = client.chat.completions.create(
-        model=get_openrouter_model_name(model_name),
-        temperature=0.0,
-        max_tokens=1024,
-        messages=[
+    request_payload = {
+        "model": get_openrouter_model_name(model_name),
+        "temperature": 0.0,
+        "max_tokens": 1024,
+        "messages": [
             {"role": "system", "content": DEFAULT_PROMPT},
             {"role": "user", "content": question},
         ],
-    )
+    }
+    request_payload.update(MODEL_CONFIGS[model_name].get("request_args", {}))
+    response = client.chat.completions.create(**request_payload)
     content = response.choices[0].message.content
     if isinstance(content, list):
         content = "".join(part.text or "" for part in content if getattr(part, "type", "") == "text")
@@ -142,6 +150,7 @@ QUERY_FUNCTIONS = {
     "grok": lambda question, client: query_openrouter(question, client, "grok"),
     "gemini": lambda question, client: query_openrouter(question, client, "gemini"),
     "llama": lambda question, client: query_openrouter(question, client, "llama"),
+    "glm": lambda question, client: query_openrouter(question, client, "glm"),
 }
 
 
@@ -223,7 +232,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--models",
         default="all",
-        help="Comma-separated model names to run (claude, openai, grok, gemini) or 'all'.",
+        help="Comma-separated model names to run (claude, openai, grok, gemini, llama, glm) or 'all'.",
     )
     parser.add_argument(
         "--questions",

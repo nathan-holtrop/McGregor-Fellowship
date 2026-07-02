@@ -20,6 +20,16 @@ def test_get_openrouter_model_name_uses_default_llama_identifier():
     assert collect_pipeline.get_openrouter_model_name("llama") == "llama-4"
 
 
+def test_get_openrouter_model_name_uses_default_glm_identifier():
+    assert collect_pipeline.get_openrouter_model_name("glm") == "z-ai/glm-5.2"
+
+
+def test_get_openrouter_model_name_uses_config_override_for_glm(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_MODEL_GLM", "z-ai/glm-5.2")
+
+    assert collect_pipeline.get_openrouter_model_name("glm") == "z-ai/glm-5.2"
+
+
 def test_make_clients_uses_openrouter_single_client(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)

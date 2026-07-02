@@ -40,6 +40,7 @@ The pipeline uses a single OpenRouter key for all models. To override the exact 
 - `OPENROUTER_MODEL_GROK`
 - `OPENROUTER_MODEL_GEMINI`
 - `OPENROUTER_MODEL_LLAMA`
+- `OPENROUTER_MODEL_GLM`
 
 If no override is provided, the repository uses the default OpenRouter model IDs defined in `collect_pipeline.py`.
 
@@ -49,7 +50,7 @@ If no override is provided, the repository uses the default OpenRouter model IDs
 
 ## Notes
 - Generated outputs are written to `data/responses/`.
-- The pipeline supports Claude, OpenAI, Grok, Gemini, and Llama using a single OpenRouter key and per-model OpenRouter IDs.
+- The pipeline supports Claude, OpenAI, Grok, Gemini, Llama, and GLM using a single OpenRouter key and per-model OpenRouter IDs.
 
 ## GitHub Pages UI
 A static frontend is available under `docs/` for CSV upload, model selection, and request preview.
