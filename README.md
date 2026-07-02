@@ -32,6 +32,11 @@ Or run a subset of models:
 
     python collect_pipeline.py --models claude,grok
 
+## Testing
+Install the repository dependencies and run:
+
+    python -m pytest -q tests/test_collect_pipeline.py
+
 ## OpenRouter model overrides
 The pipeline uses a single OpenRouter key for all models. To override the exact OpenRouter model ID used for a specific model alias, set any of:
 

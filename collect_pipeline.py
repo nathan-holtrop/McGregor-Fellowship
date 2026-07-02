@@ -17,8 +17,7 @@ except ImportError:  # pragma: no cover
 
 DEFAULT_PROMPT = """You are a knowledgeable assistant answering questions about early church history.
 Provide accurate, detailed, and nuanced responses based on historical scholarship.
-Acknowledge uncertainty or scholarly debate where it exists.
-Do not refuse historically answerable questions on the grounds of contemporary theological controversy."""
+Respond in approximately 200–350 words."""
 DEFAULT_QUESTION_CSV = Path("figures/question_bank.csv")
 DEFAULT_OUTPUT_DIR = Path("data/responses")
 
