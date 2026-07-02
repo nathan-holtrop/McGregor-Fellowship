@@ -17,11 +17,11 @@ def test_get_openrouter_model_name_uses_config_override(monkeypatch):
 
 
 def test_get_openrouter_model_name_uses_default_llama_identifier():
-    assert collect_pipeline.get_openrouter_model_name("llama") == "llama-4"
+    assert collect_pipeline.get_openrouter_model_name("llama") == "~meta/llama-4"
 
 
 def test_get_openrouter_model_name_uses_default_glm_identifier():
-    assert collect_pipeline.get_openrouter_model_name("glm") == "z-ai/glm-5.2"
+    assert collect_pipeline.get_openrouter_model_name("glm") == "~z-ai/glm-5.2"
 
 
 def test_get_openrouter_model_name_uses_config_override_for_glm(monkeypatch):

@@ -25,33 +25,33 @@ MODEL_CONFIGS = {
     "claude": {
         "filename": "claude.jsonl",
         "sleep": 0.5,
-        "openrouter_model": "claude-opus-4-8",
+        "openrouter_model": "~anthropic/claude-sonnet-latest",
     },
     "openai": {
         "filename": "openai.jsonl",
         "sleep": 0.5,
-        "openrouter_model": "gpt-5-5",
+        "openrouter_model": "~openai/gpt-latest",
     },
     "grok": {
         "filename": "grok.jsonl",
         "sleep": 0.5,
-        "openrouter_model": "grok-4-3",
+        "openrouter_model": "x-ai/grok-4.3",
     },
     "gemini": {
         "filename": "gemini.jsonl",
         "sleep": 1.0,
-        "openrouter_model": "gemini-3-1-pro",
+        "openrouter_model": "~google/gemini-1.5-pro",
     },
     "llama": {
         "filename": "llama.jsonl",
         "sleep": 1.0,
-        "openrouter_model": "llama-4",
+        "openrouter_model": "~meta/llama-4",
     },
     "glm": {
         "filename": "glm.jsonl",
         "sleep": 1.0,
-        "openrouter_model": "z-ai/glm-5.2",
-        "request_args": {"reasoning": {"enabled": True}},
+        "openrouter_model": "~z-ai/glm-5.2",
+        "extra_body": {"reasoning": {"enabled": True}},
     },
 }
 
@@ -133,8 +133,11 @@ def query_openrouter(question: str, client: object, model_name: str) -> tuple[st
             {"role": "user", "content": question},
         ],
     }
-    request_payload.update(MODEL_CONFIGS[model_name].get("request_args", {}))
-    response = client.chat.completions.create(**request_payload)
+    extra_body = MODEL_CONFIGS[model_name].get("extra_body")
+    if extra_body is not None:
+        response = client.chat.completions.create(**request_payload, extra_body=extra_body)
+    else:
+        response = client.chat.completions.create(**request_payload)
     content = response.choices[0].message.content
     if isinstance(content, list):
         content = "".join(part.text or "" for part in content if getattr(part, "type", "") == "text")
