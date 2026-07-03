@@ -6,12 +6,13 @@ import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
-import pandas as pd
-from dotenv import load_dotenv
+import pandas as pd  # type: ignore[import]
+from dotenv import load_dotenv  # type: ignore[import]
 
 try:
-    import openai
+    import openai  # type: ignore[import]
 except ImportError:  # pragma: no cover
     openai = None
 
@@ -89,7 +90,7 @@ def get_openrouter_model_name(model_name: str) -> str:
     return MODEL_CONFIGS[model_name]["openrouter_model"]
 
 
-def make_clients() -> dict[str, object]:
+def make_clients() -> dict[str, Any]:
     load_environment()
     clients: dict[str, object] = {}
 
@@ -122,7 +123,7 @@ def make_clients() -> dict[str, object]:
     return clients
 
 
-def query_openrouter(question: str, client: object, model_name: str) -> tuple[str, int, str]:
+def query_openrouter(question: str, client: Any, model_name: str) -> tuple[str, int, str]:
     max_tokens = 2048 if model_name == "glm" else 1024
     request_payload = {
         "model": get_openrouter_model_name(model_name),
@@ -169,7 +170,7 @@ def collect_model(
     model_name: str,
     questions: pd.DataFrame,
     output_dir: Path = DEFAULT_OUTPUT_DIR,
-    clients: dict[str, object] | None = None,
+    clients: dict[str, Any] | None = None,
 ) -> dict[str, int]:
     if model_name not in MODEL_CONFIGS:
         raise ValueError(f"Unsupported model: {model_name}")
