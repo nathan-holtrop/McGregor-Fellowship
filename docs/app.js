@@ -23,7 +23,7 @@ const providerConfig = {
       'gpt-5-5',
       'grok-4-3',
       'gemini-3-1-pro',
-      'llama-4',
+      'deepseek/deepseek-v4-pro',
       'z-ai/glm-5.2',
     ],
     endpoint: 'https://openrouter.ai/api/v1/chat/completions',

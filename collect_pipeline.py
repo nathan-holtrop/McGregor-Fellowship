@@ -42,16 +42,15 @@ MODEL_CONFIGS = {
         "sleep": 1.0,
         "openrouter_model": "~google/gemini-1.5-pro",
     },
-    "llama": {
-        "filename": "llama.jsonl",
+    "deepseek": {
+        "filename": "deepseek.jsonl",
         "sleep": 1.0,
-        "openrouter_model": "~meta/llama-4",
+        "openrouter_model": "deepseek/deepseek-v4-pro",
     },
     "glm": {
         "filename": "glm.jsonl",
         "sleep": 1.0,
         "openrouter_model": "~z-ai/glm-5.2",
-        "extra_body": {"reasoning": {"enabled": True}},
     },
 }
 
@@ -151,7 +150,7 @@ QUERY_FUNCTIONS = {
     "openai": lambda question, client: query_openrouter(question, client, "openai"),
     "grok": lambda question, client: query_openrouter(question, client, "grok"),
     "gemini": lambda question, client: query_openrouter(question, client, "gemini"),
-    "llama": lambda question, client: query_openrouter(question, client, "llama"),
+    "deepseek": lambda question, client: query_openrouter(question, client, "deepseek"),
     "glm": lambda question, client: query_openrouter(question, client, "glm"),
 }
 
@@ -234,7 +233,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--models",
         default="all",
-        help="Comma-separated model names to run (claude, openai, grok, gemini, llama, glm) or 'all'.",
+        help="Comma-separated model names to run (claude, openai, grok, gemini, deepseek, glm) or 'all'.",
     )
     parser.add_argument(
         "--questions",
