@@ -123,26 +123,36 @@ def make_clients() -> dict[str, object]:
 
 
 def query_openrouter(question: str, client: object, model_name: str) -> tuple[str, int, str]:
+    max_tokens = 2048 if model_name == "glm" else 1024
     request_payload = {
         "model": get_openrouter_model_name(model_name),
         "temperature": 0.0,
-        "max_tokens": 1024,
+        "max_tokens": max_tokens,
         "messages": [
             {"role": "system", "content": DEFAULT_PROMPT},
             {"role": "user", "content": question},
         ],
     }
-    extra_body = MODEL_CONFIGS[model_name].get("extra_body")
-    if extra_body is not None:
-        response = client.chat.completions.create(**request_payload, extra_body=extra_body)
-    else:
-        response = client.chat.completions.create(**request_payload)
-    content = response.choices[0].message.content
-    if isinstance(content, list):
-        content = "".join(part.text or "" for part in content if getattr(part, "type", "") == "text")
-    tokens = getattr(response.usage, "total_tokens", None)
-    version = getattr(response, "model", None) or get_openrouter_model_name(model_name)
-    return content, tokens or 0, version
+
+    def _send_once() -> tuple[str, int, str]:
+        extra_body = MODEL_CONFIGS[model_name].get("extra_body")
+        if extra_body is not None:
+            response = client.chat.completions.create(**request_payload, extra_body=extra_body)
+        else:
+            response = client.chat.completions.create(**request_payload)
+        content = response.choices[0].message.content
+        if isinstance(content, list):
+            content = "".join(part.text or "" for part in content if getattr(part, "type", "") == "text")
+        tokens = getattr(response.usage, "total_tokens", None)
+        version = getattr(response, "model", None) or get_openrouter_model_name(model_name)
+        return content or "", tokens or 0, version
+
+    content, tokens, version = _send_once()
+    if not content.strip():
+        time.sleep(1.0)
+        content, tokens, version = _send_once()
+
+    return content, tokens, version
 
 
 QUERY_FUNCTIONS = {

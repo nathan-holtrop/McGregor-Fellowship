@@ -50,6 +50,53 @@ def test_make_clients_uses_openrouter_single_client(monkeypatch):
     assert clients["deepseek"] is fake_client
 
 
+def test_query_openrouter_uses_higher_max_tokens_for_glm():
+    captured = {}
+
+    class FakeCompletions:
+        def create(self, **kwargs):
+            captured.update(kwargs)
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))],
+                usage=SimpleNamespace(total_tokens=3),
+                model="glm-model",
+            )
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=FakeCompletions()))
+
+    collect_pipeline.query_openrouter("question", fake_client, "glm")
+
+    assert captured["max_tokens"] == 2048
+
+
+def test_query_openrouter_retries_when_content_is_empty(monkeypatch):
+    responses = iter([
+        SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=""))],
+            usage=SimpleNamespace(total_tokens=0),
+            model="glm-model",
+        ),
+        SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content="recovered"))],
+            usage=SimpleNamespace(total_tokens=4),
+            model="glm-model",
+        ),
+    ])
+
+    class FakeCompletions:
+        def create(self, **kwargs):
+            return next(responses)
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=FakeCompletions()))
+    monkeypatch.setattr(collect_pipeline.time, "sleep", lambda *_args, **_kwargs: None)
+
+    content, tokens, version = collect_pipeline.query_openrouter("question", fake_client, "claude")
+
+    assert content == "recovered"
+    assert tokens == 4
+    assert version == "glm-model"
+
+
 def test_make_clients_requires_openrouter_api_key(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.setattr(collect_pipeline, "load_environment", lambda *args, **kwargs: None)
