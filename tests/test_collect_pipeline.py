@@ -97,6 +97,29 @@ def test_query_openrouter_retries_when_content_is_empty(monkeypatch):
     assert version == "glm-model"
 
 
+def test_get_openrouter_model_name_uses_default_grok_identifier(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_MODEL_GROK", raising=False)
+    assert collect_pipeline.get_openrouter_model_name("grok") == "x-ai/grok-4.5"
+
+
+def test_query_openrouter_reads_reasoning_tokens():
+    class FakeCompletions:
+        def create(self, **kwargs):
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))],
+                usage=SimpleNamespace(reasoningTokens=7),
+                model="grok-model",
+            )
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=FakeCompletions()))
+
+    content, tokens, version = collect_pipeline.query_openrouter("question", fake_client, "grok")
+
+    assert content == "ok"
+    assert tokens == 7
+    assert version == "grok-model"
+
+
 def test_make_clients_requires_openrouter_api_key(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.setattr(collect_pipeline, "load_environment", lambda *args, **kwargs: None)
@@ -121,3 +144,17 @@ def test_load_question_bank_maps_qnumber_and_question(tmp_path):
     assert list(df.columns)[:2] == ["question_id", "question"]
     assert df.loc[0, "question_id"] == "M1"
     assert df.loc[1, "question"] == "When and where did Macrina the Younger live?"
+
+
+def test_load_question_bank_handles_utf8_bom_header(tmp_path):
+    csv_path = tmp_path / "bank_bom.csv"
+    csv_path.write_bytes(
+        b"\xef\xbb\xbfQ#,Question,Category,Difficulty\r\n"
+        b"M1,Who was Macrina the Younger?,General,Easy\r\n"
+    )
+
+    df = collect_pipeline.load_question_bank(csv_path)
+
+    assert list(df.columns)[:2] == ["question_id", "question"]
+    assert df.loc[0, "question_id"] == "M1"
+    assert df.loc[0, "question"] == "Who was Macrina the Younger?"

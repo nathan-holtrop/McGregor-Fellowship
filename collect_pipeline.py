@@ -36,7 +36,7 @@ MODEL_CONFIGS = {
     "grok": {
         "filename": "grok.jsonl",
         "sleep": 0.5,
-        "openrouter_model": "x-ai/grok-4.3",
+        "openrouter_model": "x-ai/grok-4.5",
     },
     "gemini": {
         "filename": "gemini.jsonl",
@@ -67,7 +67,7 @@ def load_question_bank(path: Path | str = DEFAULT_QUESTION_CSV) -> pd.DataFrame:
                 f"Question bank not found at {path}."
                 " Place your CSV at figures/question_bank.csv or root Question Bank(Original 42).csv"
             )
-    questions = pd.read_csv(path)
+    questions = pd.read_csv(path, encoding="utf-8-sig")
     if "question_id" not in questions.columns or "question" not in questions.columns:
         rename_map = {}
         if "Q#" in questions.columns:
@@ -152,7 +152,17 @@ def query_openrouter(question: str, client: Any, model_name: str) -> tuple[str, 
         content = response.choices[0].message.content
         if isinstance(content, list):
             content = "".join(part.text or "" for part in content if getattr(part, "type", "") == "text")
-        tokens = getattr(response.usage, "total_tokens", None)
+        # Prefer explicit total_tokens, but fall back to reasoningTokens or other available fields
+        usage = getattr(response, "usage", None)
+        tokens = None
+        if usage is not None:
+            tokens = getattr(usage, "total_tokens", None)
+            if tokens is None:
+                tokens = getattr(usage, "totalTokens", None)
+            if tokens is None:
+                tokens = getattr(usage, "reasoningTokens", None)
+            if tokens is None:
+                tokens = getattr(usage, "reasoning_tokens", None)
         version = getattr(response, "model", None) or get_openrouter_model_name(model_name)
         return content or "", tokens or 0, version
 
