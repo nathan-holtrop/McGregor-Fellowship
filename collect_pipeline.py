@@ -124,7 +124,7 @@ def make_clients() -> dict[str, Any]:
 
 
 def query_openrouter(question: str, client: Any, model_name: str) -> tuple[str, int, str]:
-    max_tokens = 2048 if model_name == "glm" else 1024
+    max_tokens = 2048
     request_payload = {
         "model": get_openrouter_model_name(model_name),
         "temperature": 0.0,
