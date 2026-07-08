@@ -105,3 +105,19 @@ def test_make_clients_requires_openrouter_api_key(monkeypatch):
     with patch.object(collect_pipeline, "openai", fake_openai_module):
         with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY"):
             collect_pipeline.make_clients()
+
+
+def test_load_question_bank_maps_qnumber_and_question(tmp_path):
+    csv_path = tmp_path / "bank.csv"
+    csv_path.write_text(
+        "Q#,Question,Category,Difficulty\n"
+        "M1,Who was Macrina the Younger?,General,Easy\n"
+        "M2,When and where did Macrina the Younger live?,General,Easy\n",
+        encoding="utf-8",
+    )
+
+    df = collect_pipeline.load_question_bank(csv_path)
+
+    assert list(df.columns)[:2] == ["question_id", "question"]
+    assert df.loc[0, "question_id"] == "M1"
+    assert df.loc[1, "question"] == "When and where did Macrina the Younger live?"

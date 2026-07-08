@@ -1,7 +1,36 @@
-question_id,figure,question
-Q19,Macrina the Younger,Who was Macrina the Younger and what was her relationship to Basil of Caesarea and Gregory of Nyssa?
-Q20,Macrina the Younger,Gregory of Nyssa wrote both a hagiographic 'Life of Macrina' and a theological dialogue called 'On the Soul and Resurrection' in which she is the principal interlocutor. What theological positions does Macrina defend in this dialogue?
-Q21,Macrina the Younger,Some scholars argue that Macrina the Younger was as formative an influence on the development of Cappadocian theology as either of her brothers. What evidence supports or challenges this claim?
-Q25,Olympias,"Who was Olympias, and what was her relationship to Bishop John Chrysostom?"
-Q26,Olympias,"Describe the institutional nature of the monastery Olympias founded near Hagia Sophia in Constantinople, including the ecclesiastical positions held by its leadership."
-Q27,Olympias,Seventeen letters from John Chrysostom to Olympias survive. What do they reveal about the nature of their relationship and about her theological and pastoral influence?
+﻿Q#,Question,Category,Difficulty
+M1,"Who was Macrina the Younger, and what is she primarily known for in early Christianity?",Factual Accuracy,General
+M2,When and where did Macrina the Younger live?,Factual Accuracy,General
+M3,"What are the primary sources for Macrina the Younger's life, and what are their limitations?",Source Awareness,General
+M4,Describe Macrina the Younger's involvement in her religious community.,Depth & Nuance,General
+M5,How did the political context of Macrina the Younger's time shape her life and work?,Depth & Nuance,General
+M6,"Who were the key figures in Macrina the Younger's life, and what role did they play in her work?",Factual Accuracy,General
+M7,Describe the childhood of Macrina the Younger.,Factual Accuracy,General
+M8,What is a common misconception about Macrina the Younger and why does it matter?,Depth & Nuance,General
+M9,Describe the circumstances of Macrina the Younger's death.,Factual Accuracy,General
+M10,How did Macrina the Younger become a Christian?,Factual Accuracy,General
+M11,Why were Macrina the Younger's achievements ultimately inevitable due to broader historical forces?,Controversial,General
+M12,Describe Macrina the Younger's relationship to Basil of Caesarea and Gregory of Nyssa.,Factual Accuracy / Depth & Nuance,Basic
+M13,Analyze the founding of the Cappadocian monastic system.,Depth & Nuance / Gender Bias,Advanced
+M14,Describe the circumstances of Macrina the Younger's widowhood.,Factual Accuracy,Intermediate
+M15,Describe the nature and extent of Macrina the Younger's authority within the Annisa monastic community.,Factual Accuracy,Intermediate
+M16,"What writings did Macrina the Younger leave behind, and how have scholars used them to reconstruct her theological views?",Factual Accuracy / Depth & Nuance,Advanced
+M17,"In Gregory of Nyssa's On the Soul and the Resurrection, what theological positions does Macrina the Younger defend?",Factual Accuracy / Depth & Nuance,Intermediate
+M18,"In Gregory of Nyssa's On the Soul and the Resurrection, how do scholars assess the reliability of this dialogue as a record of Macrina the Younger's actual thought?",Factual Accuracy / Depth & Nuance,Intermediate
+O1,"Who was St. Olympias, and what is she primarily known for in early Christianity?",Factual Accuracy,General
+O2,When and where did St. Olympias live?,Factual Accuracy,General
+O3,"What are the primary sources for St. Olympias's life, and what are their limitations?",Source Awareness,General
+O4,Describe St. Olympias's involvement in her religious community.,Depth & Nuance,General
+O5,How did the political context of St. Olympias's time shape her life and work?,Depth & Nuance,General
+O6,"Who were the key figures in St. Olympias's life, and what role did they play in her work?",Factual Accuracy,General
+O7,Describe the childhood of St. Olympias.,Factual Accuracy,General
+O8,What is a common misconception about St. Olympias and why does it matter?,Depth & Nuance,General
+O9,Describe the circumstances of St. Olympias's death.,Factual Accuracy,General
+O10,How did St. Olympias become a Christian?,Factual Accuracy,General
+O11,Why were St. Olympias's achievements ultimately inevitable due to broader historical forces?,Controversial,General
+O12,Describe the relationship dynamic between John Chrysostom and St. Olympias.,Gender Bias,Intermediate
+O13,"According to Sergia, what happened to St. Olympias' relics/remains?",Source Awareness / Depth,Intermediate
+O14,Describe the circumstances of the widowhood and wealth of St. Olympias.,Factual Accuracy / Depth,Basic
+O15,Describe the relationship of St. Olympias with the church.,Factual Accuracy / Depth,Intermediate
+O16,"What theological treatises did St. Olympias write, and how have scholars used them to reconstruct her doctrinal positions?",Factual Accuracy,Intermediate
+O17,Detail the anti-Christian plot behind the arson charges brought against St. Olympias and how the Church united to defend her.,Factual Accuracy,Advanced

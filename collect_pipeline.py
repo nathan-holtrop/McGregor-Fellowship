@@ -69,6 +69,14 @@ def load_question_bank(path: Path | str = DEFAULT_QUESTION_CSV) -> pd.DataFrame:
             )
     questions = pd.read_csv(path)
     if "question_id" not in questions.columns or "question" not in questions.columns:
+        rename_map = {}
+        if "Q#" in questions.columns:
+            rename_map["Q#"] = "question_id"
+        if "Question" in questions.columns:
+            rename_map["Question"] = "question"
+        if rename_map:
+            questions = questions.rename(columns=rename_map)
+    if "question_id" not in questions.columns or "question" not in questions.columns:
         raise ValueError("Question bank CSV must include at least 'question_id' and 'question' columns.")
     return questions
 
