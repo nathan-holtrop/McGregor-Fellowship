@@ -30,3 +30,24 @@ def test_organize_records_by_question_groups_models_and_preserves_response_text(
     assert organized["M1"]["question"] == "Who was Macrina?"
     assert [entry["model"] for entry in organized["M1"]["responses"]] == ["claude", "openai"]
     assert [entry["response"] for entry in organized["M1"]["responses"]] == ["First answer", "Second answer"]
+
+
+def test_write_organized_markdown_orders_question_ids_naturally(tmp_path):
+    output_path = tmp_path / "organized.md"
+    records = [
+        {"question_id": "M10", "question": "Q10", "model": "claude", "response": "ten"},
+        {"question_id": "M2", "question": "Q2", "model": "claude", "response": "two"},
+        {"question_id": "O10", "question": "QO10", "model": "openai", "response": "o-ten"},
+        {"question_id": "O2", "question": "QO2", "model": "openai", "response": "o-two"},
+        {"question_id": "M1", "question": "Q1", "model": "claude", "response": "one"},
+    ]
+
+    convert_jsonl.write_organized_markdown(records, output_path)
+
+    content = output_path.read_text(encoding="utf-8")
+    positions = {
+        question_id: content.index(f"## Question: {question_id}")
+        for question_id in ["M1", "M2", "M10", "O2", "O10"]
+    }
+
+    assert positions["M1"] < positions["M2"] < positions["M10"] < positions["O2"] < positions["O10"]
